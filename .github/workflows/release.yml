@@ -1,0 +1,72 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve playwright version from file and tag
+        id: version
+        run: |
+          set -euo pipefail
+          file_version=$(cat .playwright-version)
+          tag="${GITHUB_REF_NAME#v}"
+          # tag may be "1.59.1" (matches file) or "1.59.1-1" (image revision)
+          tag_base="${tag%-*}"
+          if [ "$tag_base" != "$file_version" ]; then
+            echo "::error::git tag ($tag) does not match .playwright-version ($file_version)"
+            exit 1
+          fi
+          echo "playwright=$file_version" >> "$GITHUB_OUTPUT"
+          echo "image_tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=${{ steps.version.outputs.image_tag }}
+            type=ref,event=tag
+            type=raw,value=latest
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          build-args: |
+            PLAYWRIGHT_VERSION=${{ steps.version.outputs.playwright }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          body: |
+            Docker image: `ghcr.io/${{ github.repository }}:${{ steps.version.outputs.image_tag }}`
+            Playwright: `${{ steps.version.outputs.playwright }}`
