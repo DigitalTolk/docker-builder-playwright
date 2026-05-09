@@ -1,0 +1,16 @@
+name: Setup build
+description: Read the pinned Playwright version and set up Docker Buildx.
+
+outputs:
+  playwright-version:
+    description: Playwright version from .playwright-version
+    value: ${{ steps.version.outputs.version }}
+
+runs:
+  using: composite
+  steps:
+    - id: version
+      shell: bash
+      run: echo "version=$(cat .playwright-version)" >> "$GITHUB_OUTPUT"
+
+    - uses: docker/setup-buildx-action@v3
