@@ -1,0 +1,10 @@
+**/.git
+**/.github
+**/.gitignore
+**/.dockerignore
+**/.editorconfig
+**/.DS_Store
+**/Makefile
+**/LICENSE
+**/README.md
+**/*.md
