@@ -1,4 +1,4 @@
-PLAYWRIGHT_VERSION := $(shell cat .playwright-version)
+PLAYWRIGHT_VERSION := $(shell jq -r .dependencies.playwright package.json)
 IMAGE_NAME         ?= ghcr.io/digitaltolk/docker-builder-playwright
 IMAGE_TAG          ?= $(PLAYWRIGHT_VERSION)
 
