@@ -19,7 +19,7 @@ jobs:
       playwright: ${{ steps.version.outputs.playwright }}
       image_tag: ${{ steps.version.outputs.image_tag }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - id: version
         run: |
@@ -47,7 +47,7 @@ jobs:
             runner: ubuntu-24.04-arm
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - id: setup
         uses: ./.github/actions/setup-build
