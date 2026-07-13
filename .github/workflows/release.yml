@@ -9,15 +9,13 @@ permissions:
   contents: write
   packages: write
 
-env:
-  IMAGE: ghcr.io/${{ github.repository }}
-
 jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
       playwright: ${{ steps.version.outputs.playwright }}
       image_tag: ${{ steps.version.outputs.image_tag }}
+      image: ${{ steps.version.outputs.image }}
     steps:
       - uses: actions/checkout@v7
 
@@ -34,6 +32,8 @@ jobs:
           fi
           echo "playwright=$file_version" >> "$GITHUB_OUTPUT"
           echo "image_tag=$tag" >> "$GITHUB_OUTPUT"
+          # OCI refs must be lowercase; the org/owner in GITHUB_REPOSITORY may not be
+          echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
 
   build:
     needs: prepare
@@ -66,7 +66,7 @@ jobs:
           platforms: ${{ matrix.platform }}
           build-args: |
             PLAYWRIGHT_VERSION=${{ steps.setup.outputs.playwright-version }}
-          outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,name=${{ needs.prepare.outputs.image }},push-by-digest=true,name-canonical=true,push=true
           cache-from: type=gha,scope=${{ matrix.platform }}
           cache-to: type=gha,mode=max,scope=${{ matrix.platform }}
 
@@ -109,7 +109,7 @@ jobs:
       - id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.IMAGE }}
+          images: ${{ needs.prepare.outputs.image }}
           tags: |
             type=raw,value=${{ needs.prepare.outputs.image_tag }}
             type=ref,event=tag
@@ -120,14 +120,14 @@ jobs:
         run: |
           docker buildx imagetools create \
             $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf '${{ env.IMAGE }}@sha256:%s ' *)
+            $(printf '${{ needs.prepare.outputs.image }}@sha256:%s ' *)
 
       - name: Inspect image
-        run: docker buildx imagetools inspect ${{ env.IMAGE }}:${{ needs.prepare.outputs.image_tag }}
+        run: docker buildx imagetools inspect ${{ needs.prepare.outputs.image }}:${{ needs.prepare.outputs.image_tag }}
 
       - uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
           body: |
-            Docker image: `${{ env.IMAGE }}:${{ needs.prepare.outputs.image_tag }}`
+            Docker image: `${{ needs.prepare.outputs.image }}:${{ needs.prepare.outputs.image_tag }}`
             Playwright: `${{ needs.prepare.outputs.playwright }}`
