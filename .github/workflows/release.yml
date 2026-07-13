@@ -24,12 +24,12 @@ jobs:
       - id: version
         run: |
           set -euo pipefail
-          file_version=$(cat .playwright-version)
+          file_version=$(jq -r .dependencies.playwright package.json)
           tag="${GITHUB_REF_NAME#v}"
-          # tag may be "1.59.1" (matches file) or "1.59.1-1" (image revision)
+          # tag may be "1.59.1" (matches package.json) or "1.59.1-1" (image revision)
           tag_base="${tag%-*}"
           if [ "$tag_base" != "$file_version" ]; then
-            echo "::error::git tag ($tag) does not match .playwright-version ($file_version)"
+            echo "::error::git tag ($tag) does not match package.json playwright pin ($file_version)"
             exit 1
           fi
           echo "playwright=$file_version" >> "$GITHUB_OUTPUT"

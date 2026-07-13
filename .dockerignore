@@ -5,6 +5,7 @@
 **/.editorconfig
 **/.DS_Store
 **/Makefile
+**/package.json
 **/LICENSE
 **/README.md
 **/*.md

@@ -1,0 +1,8 @@
+{
+  "name": "docker-builder-playwright",
+  "private": true,
+  "description": "Single source of truth for the Playwright version baked into the image. Bumped by Dependabot; read by the Makefile and CI as the PLAYWRIGHT_VERSION build-arg.",
+  "dependencies": {
+    "playwright": "1.59.1"
+  }
+}

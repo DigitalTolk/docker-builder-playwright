@@ -34,7 +34,7 @@ so no `playwright install` step is needed at runtime.
 ## Local development
 
 ```sh
-make build      # build with the version pinned in .playwright-version
+make build      # build with the version pinned in package.json
 make test       # build + smoke test (prints playwright/node versions)
 make shell      # interactive bash inside the image
 make version    # print the pinned playwright version
@@ -43,13 +43,19 @@ make help       # list all targets
 
 ## Versioning
 
-[`.playwright-version`](./.playwright-version) is the single source of truth
-for the Playwright version baked into the image. The `Makefile` and CI both
-read it and pass it as the `PLAYWRIGHT_VERSION` Docker build-arg.
+The `playwright` dependency in [`package.json`](./package.json) is the single
+source of truth for the Playwright version baked into the image (pinned to an
+exact version). The `Makefile` and CI both read it with `jq` and pass it as the
+`PLAYWRIGHT_VERSION` Docker build-arg.
+
+[Dependabot](./.github/dependabot.yml) watches this pin and opens a PR when a
+newer Playwright is published (it also keeps the GitHub Actions and the
+`node:24-trixie` base image up to date).
 
 ### Cutting a release
 
-1. Bump `.playwright-version` (e.g., `1.59.1` → `1.60.0`) and commit.
+1. Bump the `playwright` pin in `package.json` (e.g., `1.59.1` → `1.60.0`) —
+   or merge the Dependabot PR that does it — and commit.
 2. Tag the commit with a matching `vX.Y.Z` tag:
 
     ```sh
@@ -57,11 +63,11 @@ read it and pass it as the `PLAYWRIGHT_VERSION` Docker build-arg.
     git push origin v1.60.0
     ```
 
-3. The `release` workflow validates that the tag matches
-   `.playwright-version`, builds multi-arch, pushes to GHCR with tags
-   `1.60.0`, `v1.60.0`, and `latest`, and creates a GitHub Release.
+3. The `release` workflow validates that the tag matches the `package.json`
+   pin, builds multi-arch, pushes to GHCR with tags `1.60.0`, `v1.60.0`, and
+   `latest`, and creates a GitHub Release.
 
-If the tag and the file disagree, the release fails fast. Image revisions
+If the tag and the pin disagree, the release fails fast. Image revisions
 on the same Playwright version (e.g., for a Dockerfile-only change) can be
 released by appending a suffix: tag `v1.60.0-1` will publish image tag
-`1.60.0-1` and update `latest` (the file still reads `1.60.0`).
+`1.60.0-1` and update `latest` (the pin still reads `1.60.0`).
