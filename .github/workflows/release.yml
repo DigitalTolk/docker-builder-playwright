@@ -125,7 +125,7 @@ jobs:
       - name: Inspect image
         run: docker buildx imagetools inspect ${{ needs.prepare.outputs.image }}:${{ needs.prepare.outputs.image_tag }}
 
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           generate_release_notes: true
           body: |
