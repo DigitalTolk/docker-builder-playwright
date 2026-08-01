@@ -1,4 +1,4 @@
-FROM node:24-trixie
+FROM node:25-trixie
 
 ARG PLAYWRIGHT_VERSION=1.59.1
 
