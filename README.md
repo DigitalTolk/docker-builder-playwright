@@ -21,7 +21,7 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/digitaltolk/docker-builder-playwright:1.59.1
+      image: ghcr.io/digitaltolk/docker-builder-playwright:1.65.1
     steps:
       - uses: actions/checkout@v4
       - run: npm ci
