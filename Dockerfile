@@ -1,6 +1,6 @@
 FROM node:24-trixie
 
-ARG PLAYWRIGHT_VERSION=1.59.1
+ARG PLAYWRIGHT_VERSION=1.65.1
 
 LABEL org.opencontainers.image.source="https://github.com/DigitalTolk/docker-builder-playwright"
 LABEL org.opencontainers.image.licenses="GPL-3.0"
