@@ -1,7 +1,7 @@
 # docker-builder-playwright
 
 Pre-built [Playwright](https://playwright.dev/) image — `chromium` + `webkit`
-on top of `node:24-trixie` — published to GHCR for use as a base image in
+on top of `node:26-trixie` — published to GHCR for use as a base image in
 GitHub Actions of downstream projects, so each consumer doesn't have to
 reinstall browsers and OS deps on every CI run.
 
@@ -50,7 +50,7 @@ exact version). The `Makefile` and CI both read it with `jq` and pass it as the
 
 [Dependabot](./.github/dependabot.yml) watches this pin and opens a PR when a
 newer Playwright is published (it also keeps the GitHub Actions and the
-`node:24-trixie` base image up to date).
+`node:26-trixie` base image up to date).
 
 ### Cutting a release
 
